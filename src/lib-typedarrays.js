@@ -1,6 +1,6 @@
 (function () {
     // Check if typed arrays are supported
-    if (typeof ArrayBuffer != 'function') {
+    if (!ArrayBuffer) {
         return;
     }
 
