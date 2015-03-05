@@ -1,6 +1,6 @@
 (function () {
     // Check if typed arrays are supported
-    if (!ArrayBuffer) {
+    if (typeof ArrayBuffer === 'undefined') {
         return;
     }
 
@@ -20,15 +20,15 @@
         }
 
         // Convert other array views to uint8
-        if (
+        else if (
             typedArray instanceof Int8Array ||
-            typedArray instanceof Uint8ClampedArray ||
+            (typeof Uint8ClampedArray !== 'undefined' && typedArray instanceof Uint8ClampedArray) ||
             typedArray instanceof Int16Array ||
             typedArray instanceof Uint16Array ||
             typedArray instanceof Int32Array ||
             typedArray instanceof Uint32Array ||
-            typedArray instanceof Float32Array ||
-            typedArray instanceof Float64Array
+            (typeof Float32Array !== 'undefined' && typedArray instanceof Float32Array) ||
+            (typeof Float64Array !== 'undefined' && typedArray instanceof Float64Array)
         ) {
             typedArray = new Uint8Array(typedArray.buffer, typedArray.byteOffset, typedArray.byteLength);
         }
