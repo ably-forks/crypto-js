@@ -1,7 +1,79 @@
+/*globals window, global, require*/
+
 /**
  * CryptoJS core components.
  */
 var CryptoJS = CryptoJS || (function (Math, undefined) {
+
+    var crypto;
+
+    // Native crypto from window (Browser)
+    if (typeof window !== 'undefined' && window.crypto) {
+        crypto = window.crypto;
+    }
+
+    // Native (experimental IE 11) crypto from window (Browser)
+    if (!crypto && typeof window !== 'undefined' && window.msCrypto) {
+        crypto = window.msCrypto;
+    }
+
+    // Native crypto from global (NodeJS)
+    if (!crypto && typeof global !== 'undefined' && global.crypto) {
+        crypto = global.crypto;
+    }
+
+    // Native crypto import via require (NodeJS)
+    if (!crypto && typeof require === 'function') {
+        try {
+            crypto = require('crypto');
+        } catch (err) {}
+    }
+
+    /*
+     * Cryptographically secure pseudorandom number generator
+     *
+     * As Math.random() is cryptographically not safe to use
+     */
+    var cryptoSecureRandomInt = function () {
+        if (crypto) {
+            // Use getRandomValues method (Browser)
+            if (typeof crypto.getRandomValues === 'function') {
+                try {
+                    return crypto.getRandomValues(new Uint32Array(1))[0];
+                } catch (err) {}
+            }
+
+            // Use randomBytes method (NodeJS)
+            if (typeof crypto.randomBytes === 'function') {
+                try {
+                    return crypto.randomBytes(4).readInt32LE();
+                } catch (err) {}
+            }
+        }
+
+        throw new Error('Native crypto module could not be used to get secure random number.');
+    };
+
+    /*
+     * Local polyfill of Object.create
+
+     */
+    var create = Object.create || (function () {
+        function F() {}
+
+        return function (obj) {
+            var subtype;
+
+            F.prototype = obj;
+
+            subtype = new F();
+
+            F.prototype = null;
+
+            return subtype;
+        };
+    }())
+
     /**
      * CryptoJS namespace.
      */
@@ -16,7 +88,7 @@ var CryptoJS = CryptoJS || (function (Math, undefined) {
      * Base object for prototypal inheritance.
      */
     var Base = C_lib.Base = (function () {
-        function F() {}
+
 
         return {
             /**
@@ -39,8 +111,7 @@ var CryptoJS = CryptoJS || (function (Math, undefined) {
              */
             extend: function (overrides) {
                 // Spawn
-                F.prototype = this;
-                var subtype = new F();
+                var subtype = create(this);
 
                 // Augment
                 if (overrides) {
@@ -48,7 +119,7 @@ var CryptoJS = CryptoJS || (function (Math, undefined) {
                 }
 
                 // Create default initializer
-                if (!subtype.hasOwnProperty('init')) {
+                if (!subtype.hasOwnProperty('init') || this.init === subtype.init) {
                     subtype.init = function () {
                         subtype.$super.init.apply(this, arguments);
                     };
@@ -210,14 +281,11 @@ var CryptoJS = CryptoJS || (function (Math, undefined) {
                     var thatByte = (thatWords[i >>> 2] >>> (24 - (i % 4) * 8)) & 0xff;
                     thisWords[(thisSigBytes + i) >>> 2] |= thatByte << (24 - ((thisSigBytes + i) % 4) * 8);
                 }
-            } else if (thatWords.length > 0xffff) {
+            } else {
                 // Copy one word at a time
                 for (var i = 0; i < thatSigBytes; i += 4) {
                     thisWords[(thisSigBytes + i) >>> 2] = thatWords[i >>> 2];
                 }
-            } else {
-                // Copy all words at once
-                thisWords.push.apply(thisWords, thatWords);
             }
             this.sigBytes += thatSigBytes;
 
@@ -274,26 +342,8 @@ var CryptoJS = CryptoJS || (function (Math, undefined) {
         random: function (nBytes) {
             var words = [];
 
-            var r = (function (m_w) {
-                var m_w = m_w;
-                var m_z = 0x3ade68b1;
-                var mask = 0xffffffff;
-
-                return function () {
-                    m_z = (0x9069 * (m_z & 0xFFFF) + (m_z >> 0x10)) & mask;
-                    m_w = (0x4650 * (m_w & 0xFFFF) + (m_w >> 0x10)) & mask;
-                    var result = ((m_z << 0x10) + m_w) & mask;
-                    result /= 0x100000000;
-                    result += 0.5;
-                    return result * (Math.random() > .5 ? 1 : -1);
-                }
-            });
-
-            for (var i = 0, rcache; i < nBytes; i += 4) {
-                var _r = r((rcache || Math.random()) * 0x100000000);
-
-                rcache = _r() * 0x3ade67b7;
-                words.push((_r() * 0x100000000) | 0);
+            for (var i = 0; i < nBytes; i += 4) {
+                words.push(cryptoSecureRandomInt());
             }
 
             return new WordArray.init(words, nBytes);
@@ -524,6 +574,8 @@ var CryptoJS = CryptoJS || (function (Math, undefined) {
          *     var processedData = bufferedBlockAlgorithm._process(!!'flush');
          */
         _process: function (doFlush) {
+            var processedWords;
+
             // Shortcuts
             var data = this._data;
             var dataWords = data.words;
@@ -556,7 +608,7 @@ var CryptoJS = CryptoJS || (function (Math, undefined) {
                 }
 
                 // Remove processed words
-                var processedWords = dataWords.splice(0, nWordsReady);
+                processedWords = dataWords.splice(0, nWordsReady);
                 data.sigBytes -= nBytesReady;
             }
 
