@@ -94,7 +94,7 @@
             // Convert
             return parseLoop(base64Str, base64StrLength, reverseMap);
 
-        },
+        }
     };
 
     function parseLoop(base64Str, base64StrLength, reverseMap) {
