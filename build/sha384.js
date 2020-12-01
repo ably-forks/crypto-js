@@ -1,6 +1,12 @@
 ;(function (root, factory) {
-	// CommonJS
-	module.exports = exports = factory(require("./core"), require("./x64-core"), require("./sha512"));
+	if (typeof exports === "object") {
+		// CommonJS
+		module.exports = exports = factory(require("./core"), require("./x64-core"), require("./sha512"));
+	}
+	else {
+		// AMD
+		define(["./core", "./x64-core", "./sha512"], factory);
+	}
 }(this, function (CryptoJS) {
 
 	(function () {

@@ -1,6 +1,12 @@
 ;(function (root, factory) {
-	// CommonJS
-	module.exports = exports = factory(require("./core"), require("./x64-core"));
+	if (typeof exports === "object") {
+		// CommonJS
+		module.exports = exports = factory(require("./core"), require("./x64-core"));
+	}
+	else {
+		// AMD
+		define(["./core", "./x64-core"], factory);
+	}
 }(this, function (CryptoJS) {
 
 	(function (Math) {

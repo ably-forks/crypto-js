@@ -1,6 +1,12 @@
 ;(function (root, factory) {
-	// CommonJS
-	module.exports = exports = factory(require("./core"), require("./enc-base64"), require("./md5"), require("./evpkdf"), require("./cipher-core"));
+	if (typeof exports === "object") {
+		// CommonJS
+		module.exports = exports = factory(require("./core"), require("./enc-base64"), require("./md5"), require("./evpkdf"), require("./cipher-core"));
+	}
+	else {
+		// AMD
+		define(["./core", "./enc-base64", "./md5", "./evpkdf", "./cipher-core"], factory);
+	}
 }(this, function (CryptoJS) {
 
 	(function () {

@@ -16,7 +16,7 @@ module.exports = function (grunt) {
 
             config = {
                 target: this.target + '/',
-                factories: ["commonjs"],
+                factories: ["commonjs", "amd"],
                 trim_whitespace: true,
                 new_line: "unix",
                 indent: "\t"

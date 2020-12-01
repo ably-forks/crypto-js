@@ -1,6 +1,12 @@
 ;(function (root, factory) {
-	// CommonJS
-	module.exports = exports = factory();
+	if (typeof exports === "object") {
+		// CommonJS
+		module.exports = exports = factory();
+	}
+	else {
+		// AMD
+		define([], factory);
+	}
 }(this, function () {
 
 	/*globals window, global, require*/

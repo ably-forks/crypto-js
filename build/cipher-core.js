@@ -1,6 +1,12 @@
 ;(function (root, factory) {
-	// CommonJS
-	module.exports = exports = factory(require("./core"), require("./evpkdf"));
+	if (typeof exports === "object") {
+		// CommonJS
+		module.exports = exports = factory(require("./core"), require("./evpkdf"));
+	}
+	else {
+		// AMD
+		define(["./core", "./evpkdf"], factory);
+	}
 }(this, function (CryptoJS) {
 
 	/**
