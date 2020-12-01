@@ -1,16 +1,6 @@
 ;(function (root, factory) {
-	if (typeof exports === "object") {
-		// CommonJS
-		module.exports = exports = factory();
-	}
-	else if (typeof define === "function" && define.amd) {
-		// AMD
-		define([], factory);
-	}
-	else {
-		// Global (browser)
-		root.CryptoJS = factory();
-	}
+	// CommonJS
+	module.exports = exports = factory();
 }(this, function () {
 
 	/*globals window, global, require*/
@@ -2832,7 +2822,7 @@
 	            // Convert
 	            return parseLoop(base64Str, base64StrLength, reverseMap);
 
-	        },
+	        }
 	    };
 
 	    function parseLoop(base64Str, base64StrLength, reverseMap) {

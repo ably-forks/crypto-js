@@ -1,16 +1,6 @@
-;(function (root, factory, undef) {
-	if (typeof exports === "object") {
-		// CommonJS
-		module.exports = exports = factory(require("./core"), require("./ripemd160"), require("./hmac"));
-	}
-	else if (typeof define === "function" && define.amd) {
-		// AMD
-		define(["./core", "./ripemd160", "./hmac"], factory);
-	}
-	else {
-		// Global (browser)
-		factory(root.CryptoJS);
-	}
+;(function (root, factory) {
+	// CommonJS
+	module.exports = exports = factory(require("./core"), require("./ripemd160"), require("./hmac"));
 }(this, function (CryptoJS) {
 
 	return CryptoJS.HmacRIPEMD160;
